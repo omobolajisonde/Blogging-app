@@ -5,7 +5,8 @@ const User = require("../models/userModel");
 const genToken = function (user) {
   const payload = { user };
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRY_TIME,
+    algorithm: "HS256",
+    expiresIn: process.env.JWT_EXPIRES_IN,
   });
   return token;
 };

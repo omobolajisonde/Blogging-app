@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const User = require("./userModel");
 
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.ObjectId;
@@ -10,10 +9,15 @@ const blogSchema = new Schema(
       type: String,
       required: [true, "Please provide the blog title."],
       trim: true,
+      unique: true,
       minLength: [5, "Blog title cannot be lesser than 5 characters"],
       maxLength: [50, "Blog title cannot be longer than 50 characters"],
     },
-    author: { type: ObjectId, required: true },
+    author: {
+      type: ObjectId,
+      required: true,
+      ref: "User",
+    },
     description: { type: String, trim: true },
     body: {
       type: String,
@@ -31,7 +35,8 @@ const blogSchema = new Schema(
     },
     timestamp: { type: Date, default: Date.now() },
     readCount: { type: Number, default: 0 },
-    readingTime: { type: String },
+    tags: [String],
+    // readingTime: { type: String }, readingTime is a virtual property/path
   },
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
@@ -42,11 +47,14 @@ blogSchema.virtual("readingTime").get(function () {
   const wordsCount =
     this.title.split(" ").length +
     this.body.split(" ").length +
-    this.description?.split(" ").length;
+    (this.description ? this.description.split(" ").length : 0);
   const readingTime = wordsCount / 200;
-  const IntAndDecimalParts = readingTime.toString().split(".");
-  const formattedReadingTime = `${IntAndDecimalParts[0]} min ${
-    IntAndDecimalParts[1] * 60
-  } sec read`;
+  const IntAndDecimalParts = readingTime.toFixed(3).split(".");
+  const formattedReadingTime = `${IntAndDecimalParts[0]}min ${Math.ceil(
+    (IntAndDecimalParts[1] / 1000) * 60
+  )}sec read`;
   return formattedReadingTime;
 });
+
+const Blog = mongoose.model("Blog", blogSchema);
+module.exports = Blog;
