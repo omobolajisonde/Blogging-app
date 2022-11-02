@@ -37,7 +37,7 @@ const apiLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   message: "Too many requests from your IP address, please try again later.",
 });
-app.use("/api", apiLimiter);
+app.use("/api", apiLimiter); // Use to limit repeated requests to public APIs
 
 app.use(`${API_BASE_URL}/auth`, authRouter);
 app.use(`${API_BASE_URL}/users`, userRouter);

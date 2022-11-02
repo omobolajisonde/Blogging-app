@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
@@ -50,6 +51,8 @@ const userSchema = new Schema({
     default: true,
     select: false,
   },
+  passwordResetToken: { type: String },
+  passwordResetTokenExpiryTime: Date,
 });
 
 // Pre /^find/ query hook for filtering out inactive users
@@ -59,14 +62,22 @@ userSchema.pre(/^find/, function (next) {
 });
 
 // Pre document hook for hashing password before save
-userSchema.pre("save", async function () {
-  // if (!this.isModified(this.password)) return next();
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next(); // prevents hashing of unmodified password
   // Hashes the password of the currently processed document
   const hashedPassword = await bcrypt.hash(this.password, 12);
   // Overwrite plain text password with hash
   this.password = hashedPassword;
   // Clear the confirm password field
   this.confirmPassword = undefined;
+  next();
+});
+
+// Pre document hook to update the passwordModifiedAt field after password change
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password") || this.isNew) return next(); // prevents update of passwordModifiedAt field for unmodified password or new document
+  this.passwordModifiedAt = Date.now() - 1000; // Setting it to 1s in the past because, although we awaited the saving the actual saving in to the db might happen just after the jwt is issued which will then render our token useless. So, setting it just a bit in the past helps us prevent this scenario
+  next();
 });
 
 // document method for checking correct password
@@ -78,8 +89,18 @@ userSchema.methods.isCorrectPassword = async function (providedPassword) {
 userSchema.methods.passwordModified = function (JWT_IAT) {
   if (!this.passwordModifiedAt) return false;
   const JWT_IAT_TS = new Date(JWT_IAT * 1000).toISOString(); // gets the ISO string timestamp of JWT IAT (milliseconds)
-  console.log(this.passwordModifiedAt);
+  console.log(this.passwordModifiedAt, "🎯🎯", JWT_IAT_TS);
   return JWT_IAT_TS < this.passwordModifiedAt;
+};
+
+// document method for generating reset Token
+userSchema.methods.genResetToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  this.passwordResetToken = hashedToken;
+  this.passwordResetTokenExpiryTime = Date.now() + 10 * 60 * 1000;
+  console.log(token, hashedToken);
+  return token;
 };
 
 const User = mongoose.model("User", userSchema);

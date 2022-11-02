@@ -1,6 +1,8 @@
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/userModel");
+const emailSender = require("../utils/emaliSender");
 
 const genToken = function (user) {
   const payload = { user };
@@ -54,5 +56,71 @@ exports.signInUser = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+exports.forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) return next(new Error("User does not exist!"));
+  try {
+    const resetToken = user.genResetToken();
+    user.save({ validateBeforeSave: false }); // persists the changes made in  genResetToken function
+    const resetPasswordURL = `${req.protocol}://${req.get(
+      "host"
+    )}/api/v1/auth/resetPassword/${resetToken}`;
+    const body = `Forgot your password? Submit a PATCH request with your new password and confirmPassword to: <a href=${resetPasswordURL}>${resetPasswordURL}</a>.\nIf you didn't forget your password, please ignore this email!`;
+    const subject = "Your password reset token (valid for 10 min)";
+    await emailSender({ email, body, subject });
+    return res.status(200).json({
+      status: "success",
+      message:
+        "Check your email inbox, a link to reset your password has been sent.",
+    });
+  } catch (error) {
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpiryTime = undefined;
+    await user.save({ validateBeforeSave: false });
+    console.log(error);
+    return next(
+      new Error(
+        "Something went wrong while sending a password resent link to your email. Please try again later."
+      )
+    );
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const token = req.params.token;
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    // Looks for user with the reset token and unexpired!
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetTokenExpiryTime: { $gt: Date.now() }, // this confirms that the token hasn't expired
+    });
+    if (!user)
+      return next(new Error("Password reset token is invalid or has expired!"));
+    const { password, confirmPassword } = req.body;
+    // Resets the password
+    user.password = password;
+    user.confirmPassword = confirmPassword;
+    // clears the passwordResetToken details on successful password update
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpiryTime = undefined;
+    await user.save({ validateModifiedOnly: true }); // saves and update the passwordModifiedAt field
+    // 4) Log the user in, send JWT
+    user.password = undefined;
+    user.passwordModifiedAt = undefined;
+    const jwttoken = genToken(user);
+    return res.status(200).json({
+      status: "success",
+      token: jwttoken,
+      data: {
+        user,
+      },
+    });
+  } catch (error) {
+    return next(error);
   }
 };
