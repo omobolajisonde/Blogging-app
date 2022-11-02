@@ -44,6 +44,7 @@ const userSchema = new Schema({
     type: Date,
     default: Date.now(),
   },
+  passwordModifiedAt: { type: Date },
   active: {
     type: Boolean,
     default: true,
@@ -53,12 +54,13 @@ const userSchema = new Schema({
 
 // Pre /^find/ query hook for filtering out inactive users
 userSchema.pre(/^find/, function (next) {
-  this.find({ active: true }); // filtering out inactive users
+  this.find({ active: { $ne: false } }); // filtering out inactive users
   next();
 });
 
-// Pre hook for hashing password before save
+// Pre document hook for hashing password before save
 userSchema.pre("save", async function () {
+  // if (!this.isModified(this.password)) return next();
   // Hashes the password of the currently processed document
   const hashedPassword = await bcrypt.hash(this.password, 12);
   // Overwrite plain text password with hash
@@ -70,6 +72,14 @@ userSchema.pre("save", async function () {
 // document method for checking correct password
 userSchema.methods.isCorrectPassword = async function (providedPassword) {
   return await bcrypt.compare(providedPassword, this.password);
+};
+
+// document method for checking if password has been modified after token was issued
+userSchema.methods.passwordModified = function (JWT_IAT) {
+  if (!this.passwordModifiedAt) return false;
+  const JWT_IAT_TS = new Date(JWT_IAT * 1000).toISOString(); // gets the ISO string timestamp of JWT IAT (milliseconds)
+  console.log(this.passwordModifiedAt);
+  return JWT_IAT_TS < this.passwordModifiedAt;
 };
 
 const User = mongoose.model("User", userSchema);

@@ -58,8 +58,7 @@ exports.updateMe = async (req, res, next) => {
     // Filter the incoming update
     const filteredBody = filterBody(req.body, "firstName", "lastName", "email");
     // Update
-    const id = req.params.id;
-    const user = await User.findByIdAndUpdate(id, filteredBody, {
+    const user = await User.findByIdAndUpdate(req.user._id, filteredBody, {
       new: true,
       runValidators: true, // runs validators for only updated fields, unlike save (validateBeforeSave) which runs for all fields regardless
     });
@@ -74,10 +73,9 @@ exports.updateMe = async (req, res, next) => {
   }
 };
 
-exports.deleteBlog = async (req, res, next) => {
+exports.deleteMe = async (req, res, next) => {
   try {
-    const id = req.params.id;
-    await User.findByIdAndUpdate(id, { active: false });
+    await User.findByIdAndUpdate(req.user._id, { active: false });
     return res.status(204).json({
       status: "success",
       data: null,
