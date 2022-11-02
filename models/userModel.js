@@ -40,6 +40,21 @@ const userSchema = new Schema({
       message: "Passwords must match.",
     },
   },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
+});
+
+// Pre /^find/ query hook for filtering out inactive users
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: true }); // filtering out inactive users
+  next();
 });
 
 // Pre hook for hashing password before save

@@ -2,6 +2,7 @@ const express = require("express");
 const passport = require("passport");
 
 const authRouter = require("./routes/authRoutes");
+const userRouter = require("./routes/userRoutes");
 const blogRouter = require("./routes/blogRoutes");
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(`${API_BASE_URL}/auth`, authRouter);
+app.use(`${API_BASE_URL}/users`, userRouter);
 app.use(`${API_BASE_URL}/blogs`, blogRouter);
 
 // Any request that makes it to this part has lost it's way

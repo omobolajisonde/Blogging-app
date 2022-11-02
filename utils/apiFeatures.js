@@ -39,7 +39,7 @@ class ApiFeatures {
       const sortBy = this.queryParams.sort.split(",").join(" ");
       this.query = this.query.sort(sortBy);
     } else {
-      this.query = this.query.sort("-timestamp");
+      this.query = this.query.sort("-createdAt");
     }
     return this;
   }

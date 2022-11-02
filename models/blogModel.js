@@ -36,7 +36,7 @@ const blogSchema = new Schema(
         message: "A blog can only be in two states, draft or published.",
       },
     },
-    timestamp: { type: Date, default: Date.now() },
+    createdAt: { type: Date, default: Date.now() },
     lastUpdatedAt: { type: Date, default: Date.now() },
     readCount: { type: Number, default: 0 },
     tags: [String],
@@ -47,6 +47,7 @@ const blogSchema = new Schema(
 
 // Virtual property (does not persist in the database, but returned on query)
 blogSchema.virtual("formattedReadingTime").get(function () {
+  if (!this.readingTime) return undefined;
   const IntAndDecimalParts = this.readingTime.toFixed(3).split(".");
   const formattedReadingTime = `${IntAndDecimalParts[0]}min ${Math.ceil(
     (IntAndDecimalParts[1] / 1000) * 60

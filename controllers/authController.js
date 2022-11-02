@@ -56,7 +56,3 @@ exports.signInUser = async (req, res, next) => {
     next(error);
   }
 };
-
-// exports.signUpUser = (req,res,next)=>{
-
-// }
