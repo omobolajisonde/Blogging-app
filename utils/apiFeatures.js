@@ -35,6 +35,7 @@ class ApiFeatures {
     return this;
   }
   sort() {
+    console.log(this.queryParams.sort);
     if (this.queryParams.sort) {
       const sortBy = this.queryParams.sort.split(",").join(" ");
       this.query = this.query.sort(sortBy);
