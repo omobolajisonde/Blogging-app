@@ -24,6 +24,7 @@ exports.signUpUser = async (req, res, next) => {
       confirmPassword,
     });
     user.password = undefined; // so the password won't show in the output and as payload in the token
+    user.__v = undefined;
     const token = genToken(user);
     return res.status(201).json({
       status: "success",
@@ -46,6 +47,7 @@ exports.signInUser = async (req, res, next) => {
     if (!user || !(await user.isCorrectPassword(password)))
       return next(new Error("Unauthenticated! Email or Password incorrect."));
     user.password = undefined;
+    user.__v = undefined;
     const token = genToken(user);
     return res.status(200).json({
       status: "success",

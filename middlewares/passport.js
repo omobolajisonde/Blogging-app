@@ -15,6 +15,7 @@ passport.use(
       try {
         // Check if the user associated with token still exists
         const claimUser = await User.findById(payload.user._id);
+        console.log(claimUser);
         if (!claimUser)
           return done(
             new Error("User associated with token no longer exists.")

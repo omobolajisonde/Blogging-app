@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 dotenv.config(); // loads enviroment variables into process.env
 
 const app = require("../app");
+const User = require("../models/userModel");
 
 // for testing purposes, we use the test DB (stub)
 const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL;
@@ -23,8 +24,9 @@ beforeAll((done) => {
 });
 
 //  Runs after all the tests
-afterAll((done) => {
-  mongoose.connection.close(done);
+afterAll(async () => {
+  await User.findOneAndDelete({ email: "wisdomomobolaji@gmail.com" });
+  mongoose.connection.close();
 });
 
 describe("Test Auth", () => {
