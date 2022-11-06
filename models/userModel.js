@@ -55,12 +55,6 @@ const userSchema = new Schema({
   passwordResetTokenExpiryTime: Date,
 });
 
-// Pre /^find/ query hook for filtering out inactive users
-userSchema.pre(/^find/, function (next) {
-  this.find({ active: { $ne: false } }); // filtering out inactive users
-  next();
-});
-
 // Pre document hook for hashing password before save
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next(); // prevents hashing of unmodified password
