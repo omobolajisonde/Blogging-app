@@ -43,6 +43,14 @@ app.use(`${API_BASE_URL}/auth`, authRouter);
 app.use(`${API_BASE_URL}/users`, userRouter);
 app.use(`${API_BASE_URL}/blogs`, blogRouter);
 
+app.use(`${API_BASE_URL}/`, (req, res, next) => {
+  return res
+    .status(200)
+    .send(
+      `Welcome to Blogging API 📝. Go to https://github.com/omobolajisonde/Blogging-app#api-reference`
+    );
+});
+
 // Any request that makes it to this part has lost it's way
 app.all("*", (req, res, next) => {
   return res.status(404).json({
