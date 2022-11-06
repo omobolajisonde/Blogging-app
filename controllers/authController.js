@@ -1,17 +1,8 @@
 const crypto = require("crypto");
-const jwt = require("jsonwebtoken");
 
 const User = require("../models/userModel");
 const emailSender = require("../utils/emaliSender");
-
-const genToken = function (user) {
-  const payload = { user };
-  const token = jwt.sign(payload, process.env.JWT_SECRET, {
-    algorithm: "HS256",
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-  return token;
-};
+const genToken = require("../utils/genToken");
 
 exports.signUpUser = async (req, res, next) => {
   try {

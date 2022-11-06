@@ -5,6 +5,7 @@ const {
   getAllUsers,
   getUser,
   updateMe,
+  updateMyPassword,
   deleteMe,
 } = require("../controllers/userController");
 
@@ -15,6 +16,10 @@ router.route("/:id").get(getUser);
 router
   .route("/updateMe")
   .patch(passport.authenticate("jwt", { session: false }), updateMe);
+router
+  .route("/updateMyPassword")
+  .patch(passport.authenticate("jwt", { session: false }), updateMyPassword);
+
 router
   .route("/deleteMe")
   .delete(passport.authenticate("jwt", { session: false }), deleteMe);

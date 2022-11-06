@@ -32,7 +32,7 @@ describe("users", () => {
   let aUserId;
   test("PATCH /api/v1/users/updateMe", async () => {
     const update = {
-      firstName: "Mark",
+      firstName: "Bolaji",
     };
     const response = await supertest(app)
       .patch(`/api/v1/users/updateMe`)
@@ -44,7 +44,7 @@ describe("users", () => {
     expect(response.statusCode).toBe(200);
     expect(response.body.status).toBe("success");
     expect(response.body.data).toHaveProperty("user");
-    expect(response.body.data.user.firstName).toBe("Mark");
+    expect(response.body.data.user.firstName).toBe("Bolaji");
   });
   test("GET /api/v1/users", async () => {
     const response = await supertest(app).get("/api/v1/users");

@@ -1,9 +1,8 @@
 # BLOGGING API 📝
----
 
 ## Description
 Blogging API is a fully functional RESTful API. Anyone can consume the `/blogs` endpoint and `GET` paginated results of all our published blogs. Published blogs can also be fetched individually by anyone via the `/blogs/:id` endpoint, where *id* is the unique identifier of the blog.
-Curious about all this API has to offer? Follow along with the remaining sections.
+Curious about all this API has to offer? [Go to API Reference](#api-reference).
 
 Built as a project at [Altschool Africa School of Engineering - Node.js track](https://www.altschoolafrica.com/schools/engineering)
 
@@ -110,10 +109,12 @@ npm test
 >**Note** - All tests are in the `tests` folder.
 
 # API REFERENCE
+
 ### Getting Started
 - Base URL: https://blog-cm7d.onrender.com/api/v1
 
--- Authentication: Getting all published blogs (paginated) and each blog does not require authentication. However, authentication is required to `CREATE`, `UPDATE` or `DELETE` a blog. To get authenticated send a POST request to  https://blog-cm7d.onrender.com/api/v1/auth/signup route to signup or  https://blog-cm7d.onrender.com/api/v1/auth/signin route to signin.
+- Authentication: Protected routes, requires a valid JWT to be sent along with the request as a Bearer Token authentication header.
+Valid tokens can be gotten on `signup` or `signin`.
 
 ### Error Handling
 - Format: Just as response to all requests are in JSON format, response to failed ones are also returned in JSON (JavaScript Object Notation) format.
@@ -126,16 +127,18 @@ npm test
 ---
 ### Endpoints
 ## `/auth`
----
 `POST '/auth/signup'`
+
 Sends a `POST` request to register a user
 - Request Body (url-encoded):
-|---|---
-|  firstName |  Omobolaji
-|  lastName |  Sonde
-|  email | omobolajisonde@gmail.com
-|  password  |  qwerty
-|  confirmPassword  |  qwerty
+
+| KEY  |  VALUE |
+|---|---|
+|  firstName |  Omobolaji |
+|  lastName |  Sonde |
+|  email | omobolajisonde@gmail.com |
+|  password  |  qwerty |
+|  confirmPassword  |  qwerty |
 
 - Request Body (JSON):
 ```json
@@ -148,6 +151,8 @@ Sends a `POST` request to register a user
 }
 ```
 - Response (JSON)
+
+Success
 ```json
 {
     "status": "success",
@@ -166,10 +171,13 @@ Sends a `POST` request to register a user
 ```
 
 `POST '/auth/signin'`
+
 Sends a `POST` request to login a user.
 
 - Request Body (url-encoded):
-|---|---
+  
+| KEY  |  VALUE |
+|---|---|
 |  email | omobolajisonde@gmail.com
 |  password  |  qwerty
 
@@ -181,6 +189,8 @@ Sends a `POST` request to login a user.
 }
 ```
 - Response (JSON)
+
+Success
 ```json
 {
     "status": "success",
@@ -198,11 +208,14 @@ Sends a `POST` request to login a user.
 ```
 
 `POST '/auth/forgotPassword'`
+
 Sends a password reset link to the email the user provided.
 
 - Request Body (url-encoded):
-|---|---
-|  email | omobolajisonde@gmail.com
+
+| KEY  |  VALUE |
+|---|---|
+|  email | omobolajisonde@gmail.com |
 
 - Request Body (JSON):
 ```json
@@ -211,6 +224,8 @@ Sends a password reset link to the email the user provided.
 }
 ```
 - Response (JSON)
+
+Success
 ```json
 {
     "status": "success",
@@ -219,14 +234,17 @@ Sends a password reset link to the email the user provided.
 ```
 
 `POST '/auth/resetPassword/<reset-token>'`
+
 Password reset link sent to user provided email inbox. Updates user password to newly provided password.
 >**Note** - `<reset-token>` expires 10 minutes after issuing.
 
 
 - Request Body (url-encoded):
-|---|---
-|  password | 123456
-|  confirmPassword | 123456
+
+| KEY  |  VALUE |
+|---|---|
+|  password | 123456 |
+|  confirmPassword | 123456 |
 
 - Request Body (JSON):
 ```json
@@ -236,6 +254,8 @@ Password reset link sent to user provided email inbox. Updates user password to 
 }
 ```
 - Response (JSON)
+
+Success
 ```json
 {
     "status": "success",
@@ -256,11 +276,13 @@ Password reset link sent to user provided email inbox. Updates user password to 
 
 ## `/blogs`
 `GET '/blogs'`
+
 Sends a `GET` request to get all published blogs on a page.
+
 - Query params: 
     - page (default: 1)
     - limit (default: 20)
-    - sort (options: read_count | reading_time | createdAt, default: -createdAt) *- before value implies `desc` order, value alone implies `asc` order*
+    - sort (options: read_count | reading_time | createdAt, default: -createdAt) *value alone implies `asc` order while - before value implies `desc` order*
     - author
     - title
     - tags
@@ -302,11 +324,16 @@ Sends a `GET` request to get all published blogs on a page.
 ```
 
 `GET '/blogs/my'`
-Sends a `GET` request to get all blogs (published or draft) belonging to a user on a page.
+
+Sends a `GET` request to get all blogs (published or draft) on a page belonging to the user associated with the token.
+
+- Header:
+    - Authorization: Bearer {token}
+  
 - Query params: 
     - page (default: 1)
     - limit (default: 20)
-    - sort (options: read_count | reading_time | createdAt, default: -createdAt) *- before value implies `desc` order, value alone implies `asc` order*
+    - sort (options: read_count | reading_time | createdAt, default: -createdAt) *value alone implies `asc` order while - before value implies `desc` order*
     - author
     - title
     - tags
@@ -341,20 +368,20 @@ Success
                 "readingTime": 0.065,
                 "formattedReadingTime": "0min 4sec read",
                 "id": "6367356ac6c0c86dbf0eb120"
-            },
-            .
-            .
-            .
+            }
         ]
     }
 }
 ```
 
 `GET '/blogs/:id'`
+
 Sends a `GET` request to get a published blog with `<id>`.
 
 - Request Body: None
 - Response (JSON)
+
+Success
 ```json
 {
     "status": "success",
@@ -388,10 +415,11 @@ Sends a `GET` request to get a published blog with `<id>`.
 }
 ```
 `POST '/blogs'`
+
 Sends a `POST` request to create a blog.
 
 - Header:
-    - Authorization: Bearer {<token>}
+    - Authorization: Bearer {token}
 
 - Request Body (JSON):
 ```json
@@ -403,6 +431,8 @@ Sends a `POST` request to create a blog.
 }
 ```
 - Response (JSON)
+
+Success
 ```json
 {
     "status": "success",
@@ -432,10 +462,11 @@ Sends a `POST` request to create a blog.
 ```
 
 `PATCH '/blogs/:id'`
+
 Sends a `PATCH` request to update a blog.
 
 - Header:
-    - Authorization: Bearer {<token>}
+    - Authorization: Bearer {token}
 
 - Request Body (JSON):
 ```json
@@ -444,6 +475,8 @@ Sends a `PATCH` request to update a blog.
 }
 ```
 - Response (JSON)
+
+Success
 ```json
 {
     "status": "success",
@@ -473,10 +506,11 @@ Sends a `PATCH` request to update a blog.
 ```
 
 `DELETE '/blogs/:id'`
+
 Sends a `DELETE` request to delete a blog with `<id>`.
 
 - Header:
-    - Authorization: Bearer {<token>}
+    - Authorization: Bearer {token}
 
 - Request Body: None
 - Response (JSON):
@@ -491,11 +525,12 @@ Success
 ## `/users`
 
 `GET '/users'`
+
 Sends a `GET` request to get all users on a page.
 - Query params: 
     - page (default: 1)
     - limit (default: 20)
-    - sort (default: -createdAt) *- before value implies `desc` order, value alone implies `asc` order*
+    - sort (default: -createdAt) *value alone implies `asc` order while - before value implies `desc` order*
 
 - Request Body: None
 - Response (JSON)
@@ -504,7 +539,7 @@ Success
 ```json
 {
     "status": "success",
-    "results": 4,
+    "results": 1,
     "page": 1,
     "data": {
         "users": [
@@ -515,19 +550,19 @@ Success
                 "email": "omobolajisonde@gmail.com",
                 "createdAt": "2022-11-06T13:07:45.259Z"
             }
-            .
-            .
-            .
         ]
     }
 }
 ```
 
 `GET '/user/:id'`
+
 Sends a `GET` request to get a user with `<id>`.
 
 - Request Body: None
 - Response (JSON)
+
+Success
 ```json
 {
     "status": "success",
@@ -546,11 +581,12 @@ Sends a `GET` request to get a user with `<id>`.
 
 
 `PATCH '/users/updateMe'`
+
 Sends a `PATCH` request to update the user associated with the <token> info.
->**Note** - This endpoint is used to update user info other than the user's password. Use `/auth/forgotPassword` instead.
+>**Note** - This endpoint is used to update user info other than the user's password. Use `/users/updateMyPassword` to update user password.
 
 - Header:
-    - Authorization: Bearer {<token>}
+    - Authorization: Bearer {token}
 
 - Request Body (JSON):
 ```json
@@ -577,11 +613,47 @@ Success
 }
 ```
 
+`PATCH '/users/updateMyPassword'`
+
+Sends a `PATCH` request to update the user associated with the <token> password.
+>**Note** - This endpoint is used to update user password only. Use `/users/updateMe` to update other user info other than password.
+
+- Header:
+    - Authorization: Bearer {token}
+
+- Request Body (JSON):
+```json
+{
+    "currentPassword": "qwerty",
+    "password": "123456",
+    "confirmPassword": "123456"
+}
+```
+- Response (JSON)
+
+Success
+```json
+{
+    "status": "success",
+    "token": "<token>",
+    "data": {
+        "user": {
+            "_id": "6367a84845e5893038a55bf1",
+            "firstName": "Omobolaji",
+            "lastName": "Sonde",
+            "email": "omobolajisonde@gmail.com",
+            "createdAt": "2022-11-06T13:07:45.259Z",
+            "passwordModifiedAt": "2022-11-06T15:02:47.270Z"
+        }
+    }
+}
+```
+
 `DELETE '/users/deleteMe'`
 Sends a `DELETE` request to delete the user associated with the <token>.
 
 - Header:
-    - Authorization: Bearer {<token>}
+    - Authorization: Bearer {token}
 
 - Request Body: None
 - Response (JSON):
@@ -590,6 +662,7 @@ Success
 ```json
 {}
 ```
+---
 
 ## Deployment
 https://blog-cm7d.onrender.com
