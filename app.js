@@ -39,9 +39,6 @@ const apiLimiter = rateLimit({
 });
 app.use("/api", apiLimiter); // Use to limit repeated requests to public APIs
 
-// app.use("/", (req, res, next) => {
-//   return res.redirect("/blogs");
-// });
 app.use(`${API_BASE_URL}/auth`, authRouter);
 app.use(`${API_BASE_URL}/users`, userRouter);
 app.use(`${API_BASE_URL}/blogs`, blogRouter);
@@ -50,7 +47,7 @@ app.use(`${API_BASE_URL}/blogs`, blogRouter);
 app.all("*", (req, res, next) => {
   return res.status(404).json({
     status: "failed",
-    message: `Can't find ${req.originalUrl} on this server!`,
+    message: `Can't find ${req.originalUrl} on this server! Go to /api/v1/blogs`,
   });
 });
 
