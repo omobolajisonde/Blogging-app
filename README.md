@@ -1,186 +1,438 @@
-# BLOGGING API
-This is an api for a blogging app
-
+# BLOGGING API 📝
 ---
 
-## Requirements
-1. User should be able to register 
-2. User should be able to login with Passport using JWT
-3. Implement basic auth
-4. User should be able to get orders
-5. Users should be able to create orders
-6. Users should be able to update and delete orders
-7. Test application
----
-## Setup
-- Install NodeJS, mongodb
-- pull this repo
-- update env with example.env
-- run `npm run start:dev`
+## Description
+Blogging API is a fully functional RESTful API. Anyone can consume the `/blogs` endpoint and `GET` paginated results of all our published blogs. Published blogs can also be fetched individually by anyone via the `/blogs/:id` endpoint, where *id* is the unique identifier of the blog.
+Curious about all this API has to offer? Follow along with the remaining sections.
 
----
-## Base URL
-- somehostsite.com
+Built as a project at [Altschool Africa School of Engineering - Node.js track](https://www.altschoolafrica.com/schools/engineering)
 
+## Tech Stack
+### 1. Main Dependencies
+ * **node.js** and **express** as the JavaScript runtime environment and server framework
+ * **mongodb** as our database of choice
+ * **mongoose** as an ODM library of choice
+ * **passport** for authentication. This API uses the JWT strategy
+ * **jsonwebtoken** for signing and verifying JWTs
+ * **bcrypt** to hash + salt passwords and compare.
 
+## Main Files: Project Structure
+
+  ```sh
+  ├── README.md
+  ├── package.json *** The dependencies to be installed with "npm install"
+  ├── server.js
+  ├── app.js
+  ├── config
+  │   ├── db.js
+  ├── routes
+  │   ├── authRoutes.js
+  │   ├── blogRoutes.js
+  │   ├── userRoutes.js
+  ├── controllers
+  │   ├── authController.js
+  │   ├── blogController.js
+  │   ├── userController.js
+  ├── models
+  │   ├── blogModel.js
+  │   ├── userModel.js
+  ├── tests
+  │   ├── auth.route.test.js *** contains code for testing the `/auth` endpoints.
+  │   ├── blogs.route.test.js *** contains code for testing the `/blogs` endpoints.
+  │   ├── users.route.test.js *** contains code for testing the `/users` endpoints.
+  └──  utils
+  │   ├── apiFeatures.js
+  └── └── emailSender.js
+```
+
+## Getting Started Locally
+
+### Prerequisites & Installation
+To be able to get this application up and running, ensure to have [node](https://nodejs.org/en/download/) installed on your device.
+
+### Development Setup
+1. **Download the project locally by forking this repo and then clone or just clone directly via:**
+```bash
+git clone https://github.com/omobolajisonde/Blogging-app.git
+```
+2. **Set up the Database**
+   - Create 2 MongoDB databases (main and test) on your local MongoDB server or in the cloud (Atlas)
+   - Copy the connection strings and assign it to the `DATABASE_URI` and `TEST_DATABASE_URL` environment variables each.
+   - On connection to these databases, two collections - `users` and `blogs` will be created.
 ## Models
 ---
 
 ### User
 | field  |  data_type | constraints  |
 |---|---|---|
-|  id |  string |  required |
-|  username |  string |  required |
-|  firstname | string  |  optional|
-|  lastname  |  string |  optional  |
-|  email     | string  |  optional |
-|  password |   string |  required  |
-|  user_type |  string |  required, default: user, enum: ['user', 'admin'] |
+|  id |  ObjectId |  auto_generated  |
+|  firstName | String  |  required|
+|  lastName  |  String |  required  |
+|  email     | String  |  required |
+|  password |   String |  required  |
+|  confirmPassword |   String |  required  |
+|  createdAt |   Date |  default_value  |
 
 
-### Order
+### Blog
 | field  |  data_type | constraints  |
 |---|---|---|
-|  id |  string |  required |
-|  created_at |  date |  required |
-|  state | number  |  required,default:1|
-|  total_price  |  number |  required  |
-|  items     | array  |  required |
-|  item.name |   string |  required  |
-|  item.price |  number |  required |
-|  item.size |  string |  required, enum: ['m', 's', 'l'] |
-|  item.quantity |  number |  required, enum: ['m', 's', 'l'] |
+|  id |  ObjectId |  auto_generated  |
+|  title |  String |  required & unique |
+|  author | String  |  dynamically_assigned |
+|  author_id  |  ObjectId |  dynamically_assigned  |
+|  description     | String  |  optional |
+|  state |   String |  required  |
+|  createdAt |  Date |  default_value |
+|  lastUpdatedAt |  Date |  default_value |
+|  readCount |  Number |  default_value |
+|  tags |  Array <str> |  optional |
+|  readingTime |  Number |  dynamically_assigned |
 
+3. **Install the dependencies** from the root directory, in terminal run:
+```
+npm install
+```
 
+4. **Run the development server:**
+```bash
+npm run dev
+```
+5. **At this point, your server should be up and running** at [http://127.0.0.1:8000/](http://127.0.0.1:8000/) or [http://localhost:8080](http://localhost:8080)
 
-## APIs
 ---
 
-### Signup User
-
-- Route: /signup
-- Method: POST
-- Body: 
+## Testing
+In order to run tests, navigate to the root directory and run the following commands:
+``` bash
+npm test
 ```
+>**Note** - All tests are in the `tests` folder.
+
+# API REFERENCE
+### Getting Started
+- Base URL: https://blog-cm7d.onrender.com/api/v1
+
+-- Authentication: Getting all published blogs (paginated) and each blog does not require authentication. However, authentication is required to `CREATE`, `UPDATE` or `DELETE` a blog. To get authenticated send a POST request to  https://blog-cm7d.onrender.com/api/v1/auth/signup route to signup or  https://blog-cm7d.onrender.com/api/v1/auth/signin route to signin.
+
+### Error Handling
+- Format: Just as response to all requests are in JSON format, response to failed ones are also returned in JSON (JavaScript Object Notation) format.
+```json
 {
-  "email": "doe@example.com",
-  "password": "Password1",
-  "firstname": "jon",
-  "lastname": "doe",
-  "username": 'jon_doe",
+    "status": "failed",
+    "message": "error message"
+}
+```
+---
+### Endpoints
+## `/auth`
+---
+`POST '/auth/signup'`
+Sends a `POST` request to register a user
+- Request Body (url-encoded):
+|---|---
+|  firstName |  Omobolaji
+|  lastName |  Sonde
+|  email | omobolajisonde@gmail.com
+|  password  |  qwerty
+|  confirmPassword  |  qwerty
+
+- Request Body (JSON):
+```json
+{
+    "firstName": "Omobolaji",
+    "lastName": "Sonde",
+    "email": "omobolajisonde@gmail.com",
+    "password": "qwerty",
+    "confirmPassword": "qwerty"
+}
+```
+- Response (JSON)
+```json
+{
+    "status": "success",
+    "token": "<token>",
+    "data": {
+        "user": {
+            "firstName": "Omobolaji",
+            "lastName": "Sonde",
+            "email": "omobolajisonde@gmail.com",
+            "createdAt": "2022-11-06T10:39:47.077Z",
+            "active": true,
+            "_id": "6367a84845e5893038a55bf1"
+        }
+    }
 }
 ```
 
-- Responses
+`POST '/auth/signin'`
+Sends a `POST` request to login a user.
 
-Success
-```
+- Request Body (url-encoded):
+|---|---
+|  email | omobolajisonde@gmail.com
+|  password  |  qwerty
+
+- Request Body (JSON):
+```json
 {
-    message: 'Signup successful',
-    user: {
-        "email": "doe@example.com",
-        "password": "Password1",
-        "firstname": "jon",
-        "lastname": "doe",
-        "username": 'jon_doe",
+    "email": "omobolajisonde@gmail.com",
+    "password": "qwerty",
+}
+```
+- Response (JSON)
+```json
+{
+    "status": "success",
+    "token": "<token>",
+    "data": {
+        "user": {
+            "_id": "6367a84845e5893038a55bf1",
+            "firstName": "Omobolaji",
+            "lastName": "Sonde",
+            "email": "omobolajisonde@gmail.com",
+            "createdAt": "2022-11-06T10:39:47.077Z"
+        }
+    }
+}
+```
+
+`POST '/auth/forgotPassword'`
+Sends a password reset link to the email the user provided.
+
+- Request Body (url-encoded):
+|---|---
+|  email | omobolajisonde@gmail.com
+
+- Request Body (JSON):
+```json
+{
+    "email": "omobolajisonde@gmail.com",
+}
+```
+- Response (JSON)
+```json
+{
+    "status": "success",
+    "message": "Check your email inbox, a link to reset your password has been sent."
+}
+```
+
+`POST '/auth/resetPassword/<reset-token>'`
+Password reset link sent to user provided email inbox. Updates user password to newly provided password.
+>**Note** - `<reset-token>` expires 10 minutes after issuing.
+
+
+- Request Body (url-encoded):
+|---|---
+|  password | 123456
+|  confirmPassword | 123456
+
+- Request Body (JSON):
+```json
+{
+    "password": "123456",
+    "confirmPassword": "123456"
+}
+```
+- Response (JSON)
+```json
+{
+    "status": "success",
+    "token": "<token>",
+    "data": {
+        "user": {
+            "_id": "6367a84845e5893038a55bf1",
+            "firstName": "Omobolaji",
+            "lastName": "Sonde",
+            "email": "omobolajisonde@gmail.com",
+            "createdAt": "2022-11-06T10:39:47.077Z",
+            "__v": 0
+        }
     }
 }
 ```
 ---
-### Login User
 
-- Route: /login
-- Method: POST
-- Body: 
-```
-{
-  "password": "Password1",
-  "username": 'jon_doe",
-}
-```
-
-- Responses
-
-Success
-```
-{
-    message: 'Login successful',
-    token: 'sjlkafjkldsfjsd'
-}
-```
-
----
-### Create Order
-
-- Route: /orders
-- Method: POST
-- Header
-    - Authorization: Bearer {token}
-- Body: 
-```
-{
-    items: [{ name: 'chicken pizza', price: 900, size: 'm', quantity: 1}]
-}
-```
-
-- Responses
-
-Success
-```
-{
-    state: 1,
-    total_price: 900,
-    created_at: Mon Oct 31 2022 08:35:00 GMT+0100,
-    items: [{ name: 'chicken pizza', price: 900, size: 'm', quantity: 1}]
-}
-```
----
-### Get Order
-
-- Route: /orders/:id
-- Method: GET
-- Header
-    - Authorization: Bearer {token}
-- Responses
-
-Success
-```
-{
-    state: 1,
-    total_price: 900,
-    created_at: Mon Oct 31 2022 08:35:00 GMT+0100,
-    items: [{ name: 'chicken pizza', price: 900, size: 'm', quantity: 1}]
-}
-```
----
-
-### Get Orders
-
-- Route: /orders
-- Method: GET
-- Header:
-    - Authorization: Bearer {token}
+## `/blogs`
+`GET '/blogs'`
+Sends a `GET` request to get all published blogs on a page.
 - Query params: 
     - page (default: 1)
-    - per_page (default: 10)
-    - order_by (default: created_at)
-    - order (options: asc | desc, default: desc)
-    - state
-    - created_at
-- Responses
+    - limit (default: 20)
+    - sort (options: read_count | reading_time | createdAt, default: -createdAt) *- before value implies `desc` order, value alone implies `asc` order*
+    - author
+    - title
+    - tags
 
-Success
-```
+- Request Body: None
+- Response (JSON)
+```json
 {
-    state: 1,
-    total_price: 900,
-    created_at: Mon Oct 31 2022 08:35:00 GMT+0100,
-    items: [{ name: 'chicken pizza', price: 900, size: 'm', quantity: 1}]
+    "status": "success",
+    "results": 6,
+    "page": 1,
+    "data": {
+        "blogs": [
+            {
+                "_id": "6367356ac6c0c86dbf0eb120",
+                "title": "Test Blog title",
+                "author": "Omobolaji Sonde",
+                "author_id": "6367a84845e5893038a55bf1",
+                "description": "Test Blog description...",
+                "body": "Lorem ipsum dolor sit amet, consectetur adipisicing",
+                "state": "published",
+                "createdAt": "2022-11-06T04:16:34.964Z",
+                "lastUpdatedAt": "2022-11-06T04:32:12.341Z",
+                "readCount": 2,
+                "tags": [
+                    "test",
+                    "jest"
+                ],
+                "readingTime": 0.065,
+                "formattedReadingTime": "0min 4sec read",
+                "id": "6367356ac6c0c86dbf0eb120"
+            },
+            .
+            .
+            .
+        ]
+    }
 }
 ```
----
 
-...
+`GET '/blogs/:id'`
+Sends a `GET` request to get a published blog with `<id>`.
 
-## Contributor
-- Daniel Adesoji
+- Request Body: None
+- Response (JSON)
+```json
+{
+    "status": "success",
+    "data": {
+        "blog": {
+            "_id": "6367356ac6c0c86dbf0eb120",
+            "title": "Test Blog title",
+            "author": "Omobolaji Sonde",
+            "author_id": {
+                "_id": "6367a84845e5893038a55bf1",
+                "firstName": "Omobolaji",
+                "lastName": "Sonde",
+                "email": "omobolajisonde@gmail.com",
+                "createdAt": "2022-11-06T10:39:47"
+            },
+            "description": "Test Blog description...",
+                "body": "Lorem ipsum dolor sit amet, consectetur adipisicing",
+                "state": "published",
+                "createdAt": "2022-11-06T04:16:34.964Z",
+                "lastUpdatedAt": "2022-11-06T04:32:12.341Z",
+                "readCount": 2,
+                "tags": [
+                    "test",
+                    "jest"
+                ],
+                "readingTime": 0.065,
+                "formattedReadingTime": "0min 4sec read",
+                "id": "6367356ac6c0c86dbf0eb120"
+        }
+    }
+}
+```
+`POST '/blogs'`
+Sends a `POST` request to create a blog.
+
+- Header:
+    - Authorization: Bearer {<token>}
+
+- Request Body (JSON):
+```json
+{
+    "title": "Test blog title",
+    "description": "Test blog description",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipisicing",
+    "tags": ["jest", "test"]
+}
+```
+- Response (JSON)
+```json
+{
+    "status": "success",
+    "data": {
+        "blog": {
+            "title": "Test blog title",
+            "author": "Omobolaji Sonde",
+            "author_id": "6367a84845e5893038a55bf1",
+            "description": "Test blog description",
+            "body": "Lorem ipsum dolor sit amet, consectetur adipisicing",
+            "state": "draft",
+            "createdAt": "2022-11-06T13:07:45.365Z",
+            "lastUpdatedAt": "2022-11-06T13:07:45.365Z",
+            "readCount": 0,
+            "tags": [
+                "jest",
+                "test"
+            ],
+            "readingTime": 0.065,
+            "_id": "6367356ac6c0c86dbf0eb120",
+            "__v": 0,
+            "formattedReadingTime": "0min 4sec read",
+            "id": "6367356ac6c0c86dbf0eb120"
+        }
+    }
+}
+```
+
+`PATCH '/blogs/:id'`
+Sends a `PATCH` request to update a blog.
+
+- Header:
+    - Authorization: Bearer {<token>}
+
+- Request Body (JSON):
+```json
+{
+    "state": "published",
+}
+```
+- Response (JSON)
+```json
+{
+    "status": "success",
+    "data": {
+        "blog": {
+            "title": "Test blog title",
+            "author": "Omobolaji Sonde",
+            "author_id": "6367a84845e5893038a55bf1",
+            "description": "Test blog description",
+            "body": "Lorem ipsum dolor sit amet, consectetur adipisicing",
+            "state": "published",
+            "createdAt": "2022-11-06T13:07:45.365Z",
+            "lastUpdatedAt": "2022-11-06T13:07:45.365Z",
+            "readCount": 0,
+            "tags": [
+                "jest",
+                "test"
+            ],
+            "readingTime": 0.065,
+            "_id": "6367356ac6c0c86dbf0eb120",
+            "__v": 0,
+            "formattedReadingTime": "0min 4sec read",
+            "id": "6367356ac6c0c86dbf0eb120"
+        }
+    }
+}
+```
+
+`DELETE '/blogs/:id'`
+Sends a `DELETE` request to delete a blog with `<id>`.
+
+- Header:
+    - Authorization: Bearer {<token>}
+
+- Request Body: None
+- Response (JSON):
+
+Success
+```json
+{}
+```
