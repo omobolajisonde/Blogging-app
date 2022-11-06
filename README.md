@@ -590,3 +590,12 @@ Success
 ```json
 {}
 ```
+
+## Deployment
+https://blog-cm7d.onrender.com
+
+## Authors
+[Sonde Omobolaji](https://github.com/omobolajisonde) 
+
+## Acknowledgements 
+The awesome team at Altschool.
