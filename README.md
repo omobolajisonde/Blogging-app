@@ -301,6 +301,55 @@ Sends a `GET` request to get all published blogs on a page.
 }
 ```
 
+`GET '/blogs/my'`
+Sends a `GET` request to get all blogs (published or draft) belonging to a user on a page.
+- Query params: 
+    - page (default: 1)
+    - limit (default: 20)
+    - sort (options: read_count | reading_time | createdAt, default: -createdAt) *- before value implies `desc` order, value alone implies `asc` order*
+    - author
+    - title
+    - tags
+    - state
+
+- Request Body: None
+- Response (JSON)
+
+Success
+```json
+{
+    "status": "success",
+    "results": 6,
+    "page": 1,
+    "data": {
+        "blogs": [
+            {
+                "_id": "6367356ac6c0c86dbf0eb120",
+                "title": "Test Blog title",
+                "author": "Omobolaji Sonde",
+                "author_id": "6367a84845e5893038a55bf1",
+                "description": "Test Blog description...",
+                "body": "Lorem ipsum dolor sit amet, consectetur adipisicing",
+                "state": "draft",
+                "createdAt": "2022-11-06T04:16:34.964Z",
+                "lastUpdatedAt": "2022-11-06T04:32:12.341Z",
+                "readCount": 2,
+                "tags": [
+                    "test",
+                    "jest"
+                ],
+                "readingTime": 0.065,
+                "formattedReadingTime": "0min 4sec read",
+                "id": "6367356ac6c0c86dbf0eb120"
+            },
+            .
+            .
+            .
+        ]
+    }
+}
+```
+
 `GET '/blogs/:id'`
 Sends a `GET` request to get a published blog with `<id>`.
 
@@ -425,6 +474,111 @@ Sends a `PATCH` request to update a blog.
 
 `DELETE '/blogs/:id'`
 Sends a `DELETE` request to delete a blog with `<id>`.
+
+- Header:
+    - Authorization: Bearer {<token>}
+
+- Request Body: None
+- Response (JSON):
+
+Success
+```json
+{}
+```
+
+---
+
+## `/users`
+
+`GET '/users'`
+Sends a `GET` request to get all users on a page.
+- Query params: 
+    - page (default: 1)
+    - limit (default: 20)
+    - sort (default: -createdAt) *- before value implies `desc` order, value alone implies `asc` order*
+
+- Request Body: None
+- Response (JSON)
+
+Success
+```json
+{
+    "status": "success",
+    "results": 4,
+    "page": 1,
+    "data": {
+        "users": [
+            {
+                "_id": "6367a84845e5893038a55bf1",
+                "firstName": "Bolaji",
+                "lastName": "Sonde",
+                "email": "omobolajisonde@gmail.com",
+                "createdAt": "2022-11-06T13:07:45.259Z"
+            }
+            .
+            .
+            .
+        ]
+    }
+}
+```
+
+`GET '/user/:id'`
+Sends a `GET` request to get a user with `<id>`.
+
+- Request Body: None
+- Response (JSON)
+```json
+{
+    "status": "success",
+    "data": {
+        "user": {
+            "_id": "6367a84845e5893038a55bf1",
+            "firstName": "Omobolaji",
+            "lastName": "Sonde",
+            "email": "omobolajisonde@gmail.com",
+            "createdAt": "2022-11-06T13:07:45.259Z",
+            "__v": 0
+        }
+    }
+}
+```
+
+
+`PATCH '/users/updateMe'`
+Sends a `PATCH` request to update the user associated with the <token> info.
+>**Note** - This endpoint is used to update user info other than the user's password. Use `/auth/forgotPassword` instead.
+
+- Header:
+    - Authorization: Bearer {<token>}
+
+- Request Body (JSON):
+```json
+{
+    "firstName": "Bolaji",
+}
+```
+- Response (JSON)
+
+Success
+```json
+{
+    "status": "success",
+    "data": {
+        "user": {
+            "_id": "6367a84845e5893038a55bf1",
+            "firstName": "Bolaji",
+            "lastName": "Sonde",
+            "email": "omobolajisonde@gmail.com",
+            "createdAt": "2022-11-06T13:07:45.259Z",
+            "__v": 0
+        }
+    }
+}
+```
+
+`DELETE '/users/deleteMe'`
+Sends a `DELETE` request to delete the user associated with the <token>.
 
 - Header:
     - Authorization: Bearer {<token>}

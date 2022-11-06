@@ -52,7 +52,7 @@ exports.updateMe = async (req, res, next) => {
     if (req.body.password || req.body.confirmPassword)
       return next(
         new Error(
-          "This route is not meant for password updates. Use /users/updateMyPassword instead."
+          "This route is not meant for password updates. Use /auth/forgotPassword instead."
         )
       );
     // Filter the incoming update
