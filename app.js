@@ -47,7 +47,7 @@ app.use(`${API_BASE_URL}/blogs`, blogRouter);
 app.all("*", (req, res, next) => {
   return res.status(404).json({
     status: "failed",
-    message: `Can't find ${req.originalUrl} on this server! Go to /api/v1/blogs`,
+    message: `Can't find ${req.originalUrl} on this server! The resource you're looking for can't be found. Please check the URL before trying again.`,
   });
 });
 

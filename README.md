@@ -665,7 +665,7 @@ Success
 ---
 
 ## Deployment
-https://blog-cm7d.onrender.com
+https://blog-cm7d.onrender.com/api/v1
 
 ## Authors
 [Sonde Omobolaji](https://github.com/omobolajisonde) 
