@@ -82,7 +82,7 @@ git clone https://github.com/omobolajisonde/Blogging-app.git
 |  author | String  |  dynamically_assigned |
 |  author_id  |  ObjectId (ref: User) |  dynamically_assigned  |
 |  description     | String  |  optional |
-|  state |   String |  default_value: "draft", options: ("draft" | "published")  |
+|  state |   String |  default_value: "draft", options: ("draft" or "published")  |
 |  createdAt |  Date |  default_value: current timestamp |
 |  lastUpdatedAt |  Date |  default_value: current timestamp |
 |  readCount |  Number |  default_value: 0 |
