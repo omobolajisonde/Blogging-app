@@ -18,7 +18,7 @@ Built as a project at [Altschool Africa School of Engineering - Node.js track](h
 ## Main Files: Project Structure
 
   ```sh
-  ├── README.md
+  ├── README.md *** Instructions on how to set-up the project locally and the API reference
   ├── package.json *** The dependencies to be installed with "npm install"
   ├── server.js
   ├── app.js
@@ -41,7 +41,8 @@ Built as a project at [Altschool Africa School of Engineering - Node.js track](h
   │   ├── users.route.test.js *** contains code for testing the `/users` endpoints.
   └──  utils
   │   ├── apiFeatures.js
-  └── └── emailSender.js
+  │   ├── emailSender.js
+  └── └── genToken.js
 ```
 
 ## Getting Started Locally
@@ -64,13 +65,13 @@ git clone https://github.com/omobolajisonde/Blogging-app.git
 ### User
 | field  |  data_type | constraints  |
 |---|---|---|
-|  id |  ObjectId |  auto_generated  |
-|  firstName | String  |  required|
+|  id |  ObjectId |  auto_generated |
+|  firstName | String  |  required |
 |  lastName  |  String |  required  |
-|  email     | String  |  required |
+|  email     | String  |  required & unique |
 |  password |   String |  required  |
-|  confirmPassword |   String |  required  |
-|  createdAt |   Date |  default_value  |
+|  confirmPassword |   String |  required (must match password) |
+|  createdAt |   Date |  default_value: current timestamp  |
 
 
 ### Blog
@@ -79,12 +80,12 @@ git clone https://github.com/omobolajisonde/Blogging-app.git
 |  id |  ObjectId |  auto_generated  |
 |  title |  String |  required & unique |
 |  author | String  |  dynamically_assigned |
-|  author_id  |  ObjectId |  dynamically_assigned  |
+|  author_id  |  ObjectId (ref: User) |  dynamically_assigned  |
 |  description     | String  |  optional |
-|  state |   String |  required  |
-|  createdAt |  Date |  default_value |
-|  lastUpdatedAt |  Date |  default_value |
-|  readCount |  Number |  default_value |
+|  state |   String |  default_value: "draft", options: ("draft" | "published")  |
+|  createdAt |  Date |  default_value: current timestamp |
+|  lastUpdatedAt |  Date |  default_value: current timestamp |
+|  readCount |  Number |  default_value: 0 |
 |  tags |  Array <str> |  optional |
 |  readingTime |  Number |  dynamically_assigned |
 
@@ -93,7 +94,12 @@ git clone https://github.com/omobolajisonde/Blogging-app.git
 npm install
 ```
 
-4. **Run the development server:**
+4. **Create a .env file**.
+   - Copy and paste the content of `example.env` into this new `.env` file.
+   - Set the `EMAIL_USER` variable to your email address.
+   - Set the `EMAIL_PASSWORD` variable to your email account [app password](https://support.google.com/mail/answer/185833?hl=en).
+
+5. **Run the development server:**
 ```bash
 npm run dev
 ```
@@ -315,9 +321,6 @@ Sends a `GET` request to get all published blogs on a page.
                 "formattedReadingTime": "0min 4sec read",
                 "id": "6367356ac6c0c86dbf0eb120"
             },
-            .
-            .
-            .
         ]
     }
 }

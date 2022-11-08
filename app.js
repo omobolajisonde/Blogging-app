@@ -1,11 +1,13 @@
 const express = require("express");
 const passport = require("passport");
 const helmet = require("helmet");
+const cors = require("cors");
 const hpp = require("hpp");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 
+const rootHandler = require("./middlewares/rootHandler");
 const authRouter = require("./routes/authRoutes");
 const userRouter = require("./routes/userRoutes");
 const blogRouter = require("./routes/blogRoutes");
@@ -14,6 +16,9 @@ const app = express();
 
 // helmet middlewares (secures the Express app by setting various HTTP headers.)
 app.use(helmet());
+
+// enables CORS for all origins!
+app.use(cors());
 
 app.use(passport.initialize()); // Initialize passport
 require("./middlewares/passport");
@@ -39,17 +44,13 @@ const apiLimiter = rateLimit({
 });
 app.use("/api", apiLimiter); // Use to limit repeated requests to public APIs
 
+app.get("/", rootHandler);
+app.get("/api", rootHandler);
+app.get("/api/v1", rootHandler);
+
 app.use(`${API_BASE_URL}/auth`, authRouter);
 app.use(`${API_BASE_URL}/users`, userRouter);
 app.use(`${API_BASE_URL}/blogs`, blogRouter);
-
-app.use(`${API_BASE_URL}/`, (req, res, next) => {
-  return res
-    .status(200)
-    .send(
-      `Welcome to Blogging API 📝. Go to https://github.com/omobolajisonde/Blogging-app#api-reference`
-    );
-});
 
 // Any request that makes it to this part has lost it's way
 app.all("*", (req, res, next) => {
