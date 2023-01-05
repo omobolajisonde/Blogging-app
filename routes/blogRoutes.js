@@ -9,13 +9,18 @@ const {
   patchBlog,
   deleteBlog,
 } = require("../controllers/blogController");
+const { blogValidation } = require("../middlewares/validationMiddleware");
 
 const router = express.Router();
 
 router
   .route("/")
   .get(getAllBlogs)
-  .post(passport.authenticate("jwt", { session: false }), createBlog);
+  .post(
+    passport.authenticate("jwt", { session: false }),
+    blogValidation,
+    createBlog
+  );
 
 router
   .route("/my")
