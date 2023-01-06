@@ -12,6 +12,7 @@ const globalErrorMiddleware = require("./controllers/errorController");
 const authRouter = require("./routes/authRoutes");
 const userRouter = require("./routes/userRoutes");
 const blogRouter = require("./routes/blogRoutes");
+const httpLogger = require("./logger/httpLogger");
 
 const app = express();
 
@@ -20,6 +21,9 @@ app.use(helmet());
 
 // enables CORS for all origins!
 app.use(cors());
+
+// HTTP logging middleware
+app.use(httpLogger);
 
 app.use(passport.initialize()); // Initialize passport
 require("./middlewares/passport");
