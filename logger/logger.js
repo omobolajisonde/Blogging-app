@@ -5,6 +5,7 @@ const options = {
     level: "info",
     filename: "./logs/app.log",
     handleExceptions: true,
+    handleRejections: true,
     json: true,
     maxsize: 5242880, // 5MB
     maxFiles: 5,
@@ -13,7 +14,9 @@ const options = {
   console: {
     level: "debug",
     handleExceptions: true,
+    handleRejections: true,
     json: false,
+    format: winston.format.simple(),
     colorize: true,
   },
 };
