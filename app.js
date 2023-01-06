@@ -8,6 +8,7 @@ const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 
 const rootHandler = require("./middlewares/rootHandler");
+const globalErrorMiddleware = require("./controllers/errorController");
 const authRouter = require("./routes/authRoutes");
 const userRouter = require("./routes/userRoutes");
 const blogRouter = require("./routes/blogRoutes");
@@ -62,13 +63,6 @@ app.all("*", (req, res, next) => {
 
 // Global error handling middleware
 
-app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "An Internal server error has occured!";
-  return res.status(statusCode).json({
-    status: "failed",
-    message: message,
-  });
-});
+app.use(globalErrorMiddleware);
 
 module.exports = app;
