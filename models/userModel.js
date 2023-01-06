@@ -46,11 +46,6 @@ const userSchema = new Schema({
     default: Date.now(),
   },
   passwordModifiedAt: { type: Date },
-  active: {
-    type: Boolean,
-    default: true,
-    select: false,
-  },
   passwordResetToken: { type: String },
   passwordResetTokenExpiryTime: Date,
 });
