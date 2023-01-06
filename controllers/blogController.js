@@ -1,6 +1,7 @@
 const Blog = require("../models/blogModel");
 const catchAsync = require("../utils/catchAsync");
 const ApiFeatures = require("../utils/apiFeatures");
+const AppError = require("../utils/appError");
 
 exports.getAllBlogs = catchAsync(async (req, res, next) => {
   const processedQuery = new ApiFeatures(
@@ -46,7 +47,7 @@ exports.getBlog = catchAsync(async (req, res, next) => {
     path: "author_id",
     select: "-__v",
   });
-  if (!blog) return next(new Error("Blog does not exist!"));
+  if (!blog) return next(new AppError("Blog does not exist!", 404));
   blog.readCount += 1; // Increases the blog's read by 1
   await blog.save(); // persist it
   return res.status(200).json({
@@ -64,8 +65,6 @@ exports.createBlog = catchAsync(async (req, res, next) => {
     author_id: req.user._id,
   };
   const { title, body, description } = blogData;
-  if (!title || !body)
-    return next(new Error("Bad request! Blog must have both title and body."));
   // Assuming it takes about 1 minute to read 200 words (1 min === 200 words)
   const wordsCount =
     title.split(" ").length +
@@ -85,7 +84,7 @@ exports.createBlog = catchAsync(async (req, res, next) => {
 exports.patchBlog = catchAsync(async (req, res, next) => {
   const id = req.params.id;
   const blog = await Blog.findById(id);
-  if (!blog) return next(new Error("Blog does not exist!"));
+  if (!blog) return next(new AppError("Blog does not exist!", 404));
   if (blog.author_id.toString() !== req.user._id)
     return next(
       new Error(
@@ -108,7 +107,7 @@ exports.patchBlog = catchAsync(async (req, res, next) => {
 exports.deleteBlog = catchAsync(async (req, res, next) => {
   const id = req.params.id;
   const blog = await Blog.findById(id);
-  if (!blog) return next(new Error("Blog does not exist!"));
+  if (!blog) return next(new AppError("Blog does not exist!", 404));
   if (blog.author_id.toString() !== req.user._id)
     return next(
       new Error(

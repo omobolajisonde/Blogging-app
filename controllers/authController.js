@@ -1,5 +1,7 @@
 const crypto = require("crypto");
 
+const AppError = require("../utils/appError");
+
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const emailSender = require("../utils/emaliSender");
@@ -29,10 +31,15 @@ exports.signUpUser = catchAsync(async (req, res, next) => {
 exports.signInUser = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password)
-    return next(new Error("Bad request! Email and Password is required."));
+    return next(
+      new AppError("Bad request! Email and Password is required.", 400)
+    );
   const user = await User.findOne({ email }).select("+password");
   if (!user || !(await user.isCorrectPassword(password)))
-    return next(new Error("Unauthenticated! Email or Password incorrect."));
+    return next(
+      new AppError("Unauthenticated! Email or Password incorrect."),
+      401
+    );
   user.password = undefined;
   user.__v = undefined;
   const token = genToken(user);
@@ -48,7 +55,7 @@ exports.signInUser = catchAsync(async (req, res, next) => {
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
-  if (!user) return next(new Error("User does not exist!"));
+  if (!user) return next(new AppError("User does not exist!", 404));
   const resetToken = user.genResetToken();
   user.save({ validateBeforeSave: false }); // persists the changes made in  genResetToken function
   const resetPasswordURL = `${req.protocol}://${req.get(
@@ -85,7 +92,9 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     passwordResetTokenExpiryTime: { $gt: Date.now() }, // this confirms that the token hasn't expired
   });
   if (!user)
-    return next(new Error("Password reset token is invalid or has expired!"));
+    return next(
+      new AppError("Password reset token is invalid or has expired!", 400)
+    );
   const { password, confirmPassword } = req.body;
   // Resets the password
   user.password = password;

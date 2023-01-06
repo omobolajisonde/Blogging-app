@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const ApiFeatures = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
 const genToken = require("../utils/genToken");
 
 const filterBody = (body, ...allowableFields) => {
@@ -31,7 +32,7 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
 exports.getUser = catchAsync(async (req, res, next) => {
   const id = req.params.id;
   const user = await User.findById(id);
-  if (!user) return next(new Error("User does not exist!"));
+  if (!user) return next(new AppError("User does not exist!", 404));
   return res.status(200).json({
     status: "success",
     data: {
@@ -71,16 +72,16 @@ exports.updateMyPassword = catchAsync(async (req, res, next) => {
   const { currentPassword, password, confirmPassword } = req.body;
   // Checks if current password is indeed provided
   if (!currentPassword) {
-    return next(new Error("Provide your current password."));
+    return next(new AppError("Provide your current password.", 400));
   }
   if (!(await user.isCorrectPassword(currentPassword))) {
-    return next(new Error("Incorrect password!"));
+    return next(new AppError("Incorrect password!", 401));
   }
 
   // 3. Update password
   // Checks if password and confirmPassword is indeed provided
   if (!password || !confirmPassword) {
-    return next(new Error("Enter your new password and confirm it."));
+    return next(new AppError("Enter your new password and confirm it.", 400));
   }
   user.password = password;
   user.confirmPassword = confirmPassword;

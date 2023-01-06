@@ -1,18 +1,26 @@
+const AppError = require("../utils/appError");
+
 const handleDBCastError = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppError(message, 400);
 };
 
 const handleDBDuplicateError = (err) => {
-  const message = `Duplicate value, '${err.keyValue.name}' for the '${
-    Object.keys(err.keyPattern)[0]
-  }' field.`;
+  const message = `Duplicate value, '${
+    Object.values(err.keyValue)[0]
+  }' for the '${Object.keys(err.keyPattern)[0]}' field.`;
   return new AppError(message, 400);
 };
 
-const handleDBValidationError = (err) => {
-  const values = Object.values(err.errors).map((val) => val.message);
-  const message = `Invalid input data! ${values.join(". ")}`;
+const handleValidationError = (err) => {
+  let message;
+  if (!err.errors) {
+    message = err.message;
+  } else {
+    const values = Object.values(err.errors).map((val) => val.message);
+    message = `Invalid input data! ${values.join(". ")}`;
+  }
+
   return new AppError(message, 400);
 };
 
@@ -50,11 +58,11 @@ const sendErrorProd = (err, res) => {
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "An Internal server error has occured!";
-  if ((process.env.NODE_ENV = "development")) {
+  if (process.env.NODE_ENV === "development") {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === "production") {
-    console.log(error.name);
-    let error = JSON.parse(JSON.stringify(err)); // cause it is not ideal to manipulate function args. Also it was done this way cause the name property is only available when the output is JSON and not Object
+    // let error = JSON.parse(JSON.stringify(err)); // cause it is not ideal to manipulate function args. Also it was done this way cause the name property is only available when the output is JSON and not Object
+    let error = err;
     if (error.name === "CastError") {
       error = handleDBCastError(error); // Returns an Instance of our AppError which ofc will add the isOperational property set to true.
     }
@@ -62,7 +70,7 @@ module.exports = (err, req, res, next) => {
       error = handleDBDuplicateError(error);
     } // handles error due to value not unique in a field with the unique constraint
     if (error.name === "ValidationError") {
-      error = handleDBValidationError(error);
+      error = handleValidationError(error);
     }
     if (error.name === "JsonWebTokenError") {
       error = handleJWTError(error);
