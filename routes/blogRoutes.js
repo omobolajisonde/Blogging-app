@@ -27,6 +27,10 @@ router
   .get(passport.authenticate("jwt", { session: false }), getAllMyBlogs);
 
 router
+  .route("/my/:id")
+  .get(passport.authenticate("jwt", { session: false }), getBlog);
+
+router
   .route("/:id")
   .get(getBlog)
   .patch(passport.authenticate("jwt", { session: false }), patchBlog)

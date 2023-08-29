@@ -45,8 +45,9 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   // Prevent password update here
   if (req.body.password || req.body.confirmPassword)
     return next(
-      new Error(
-        "This route is not meant for password updates. Use /users/updateMyPassword instead."
+      new AppError(
+        "This route is not meant for password updates. Use /users/updateMyPassword instead.",
+        403
       )
     );
   // Filter the incoming update

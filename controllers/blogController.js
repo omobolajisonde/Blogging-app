@@ -4,10 +4,8 @@ const ApiFeatures = require("../utils/apiFeatures");
 const AppError = require("../utils/appError");
 
 exports.getAllBlogs = catchAsync(async (req, res, next) => {
-  const processedQuery = new ApiFeatures(
-    Blog.find({ state: "published" }),
-    req.query
-  )
+  const query = Blog.find({ state: "published" });
+  const processedQuery = new ApiFeatures(query, req.query)
     .filter()
     .sort()
     .project()
@@ -15,7 +13,7 @@ exports.getAllBlogs = catchAsync(async (req, res, next) => {
   const blogs = await processedQuery.query;
   return res.status(200).json({
     status: "success",
-    results: blogs.length,
+    results: await Blog.countDocuments({ state: "published" }),
     page: req.query.page || 1,
     data: {
       blogs,
@@ -33,7 +31,7 @@ exports.getAllMyBlogs = catchAsync(async (req, res, next) => {
   const blogs = await processedQuery.query;
   return res.status(200).json({
     status: "success",
-    results: blogs.length,
+    results: await Blog.countDocuments({ author_id: req.user._id }),
     page: req.query.page || 1,
     data: {
       blogs,
@@ -43,7 +41,11 @@ exports.getAllMyBlogs = catchAsync(async (req, res, next) => {
 
 exports.getBlog = catchAsync(async (req, res, next) => {
   const id = req.params.id;
-  const blog = await Blog.findOne({ _id: id, state: "published" }).populate({
+  let queryFilter = { _id: id, state: "published" };
+  if (req.user) {
+    delete queryFilter.state;
+  }
+  const blog = await Blog.findOne(queryFilter).populate({
     path: "author_id",
     select: "-__v",
   });
@@ -87,8 +89,9 @@ exports.patchBlog = catchAsync(async (req, res, next) => {
   if (!blog) return next(new AppError("Blog does not exist!", 404));
   if (blog.author_id.toString() !== req.user._id)
     return next(
-      new Error(
-        "Forbidden! You do not have the permission to carry out this action!"
+      new AppError(
+        "Forbidden! You do not have the permission to carry out this action!",
+        403
       )
     );
   req.body.lastUpdatedAt = Date.now(); // updates the lastUpdatedAt to the present
@@ -110,8 +113,9 @@ exports.deleteBlog = catchAsync(async (req, res, next) => {
   if (!blog) return next(new AppError("Blog does not exist!", 404));
   if (blog.author_id.toString() !== req.user._id)
     return next(
-      new Error(
-        "Forbidden! You do not have the permission to carry out this action!"
+      new AppError(
+        "Forbidden! You do not have the permission to carry out this action!",
+        403
       )
     );
   await Blog.findByIdAndDelete(id);

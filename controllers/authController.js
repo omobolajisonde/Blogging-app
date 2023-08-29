@@ -37,8 +37,7 @@ exports.signInUser = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ email }).select("+password");
   if (!user || !(await user.isCorrectPassword(password)))
     return next(
-      new AppError("Unauthenticated! Email or Password incorrect."),
-      401
+      new AppError("Unauthenticated! Email or Password incorrect.", 401)
     );
   user.password = undefined;
   user.__v = undefined;
@@ -76,8 +75,9 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
     console.log(error);
     return next(
-      new Error(
-        "Something went wrong while sending a password resent link to your email. Please try again later."
+      new AppError(
+        "Something went wrong while sending a password resent link to your email. Please try again later.",
+        500
       )
     );
   }

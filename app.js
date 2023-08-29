@@ -7,7 +7,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 
-const rootHandler = require("./middlewares/rootHandler");
+const rootController = require("./controllers/rootController");
 const globalErrorMiddleware = require("./controllers/errorController");
 const authRouter = require("./routes/authRoutes");
 const userRouter = require("./routes/userRoutes");
@@ -15,7 +15,6 @@ const blogRouter = require("./routes/blogRoutes");
 const httpLogger = require("./logger/httpLogger");
 
 const app = express();
-
 // helmet middlewares (secures the Express app by setting various HTTP headers.)
 app.use(helmet());
 
@@ -28,7 +27,7 @@ app.use(httpLogger);
 app.use(passport.initialize()); // Initialize passport
 require("./middlewares/passport");
 
-const API_BASE_URL = "/api/v1";
+const API_BASE_URL = process.env.API_BASE_URL || "/api/v1";
 
 // Body parsers middlewares
 app.use(express.json());
@@ -49,9 +48,9 @@ const apiLimiter = rateLimit({
 });
 app.use("/api", apiLimiter); // Use to limit repeated requests to public APIs
 
-app.get("/", rootHandler);
-app.get("/api", rootHandler);
-app.get("/api/v1", rootHandler);
+app.get("/", rootController);
+app.get("/api", rootController);
+app.get("/api/v1", rootController);
 
 app.use(`${API_BASE_URL}/auth`, authRouter);
 app.use(`${API_BASE_URL}/users`, userRouter);

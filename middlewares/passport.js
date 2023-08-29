@@ -3,6 +3,7 @@ const JWTStrategy = require("passport-jwt").Strategy;
 const ExtractJWT = require("passport-jwt").ExtractJwt;
 
 const User = require("../models/userModel");
+const AppError = require("../utils/appError");
 
 passport.use(
   "jwt",
@@ -17,14 +18,15 @@ passport.use(
         const claimUser = await User.findById(payload.user._id);
         if (!claimUser)
           return done(
-            new Error("User associated with token no longer exists.")
+            new AppError("User associated with token no longer exists.", 401)
           );
         // Check if the password has been changed after token was issued
         const passwordModified = claimUser.passwordModified(payload.iat);
         if (passwordModified)
           return done(
-            new Error(
-              "Invalid token! User changed password after this token was issued. Signin again to get a new token."
+            new AppError(
+              "Invalid token! User changed password after this token was issued. Signin again to get a new token.",
+              401
             )
           );
         // Grant access!
