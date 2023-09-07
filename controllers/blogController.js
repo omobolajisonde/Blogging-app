@@ -3,6 +3,23 @@ const catchAsync = require("../utils/catchAsync");
 const ApiFeatures = require("../utils/apiFeatures");
 const AppError = require("../utils/appError");
 
+exports.confirmAccess = catchAsync(async (req, res, next) => {
+  const { blogId } = req.query;
+  const blog = await Blog.findById(blogId);
+  if (!blog) return next(new AppError("Blog does not exist!", 404));
+  if (blog.author_id.toString() !== req.user._id)
+    return next(
+      new AppError(
+        "Forbidden! You do not have the permission to carry out this action!",
+        403
+      )
+    );
+  return res.status(200).json({
+    status: "success",
+    message: "Authorized!",
+  });
+});
+
 exports.getAllBlogs = catchAsync(async (req, res, next) => {
   const query = Blog.find({ state: "published" });
   const processedQuery = new ApiFeatures(query, req.query)

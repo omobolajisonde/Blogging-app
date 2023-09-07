@@ -8,10 +8,17 @@ const {
   createBlog,
   patchBlog,
   deleteBlog,
+  confirmAccess,
 } = require("../controllers/blogController");
 const { blogValidation } = require("../middlewares/validationMiddleware");
 
 const router = express.Router();
+
+router.get(
+  "/confirmAccess",
+  passport.authenticate("jwt", { session: false }),
+  confirmAccess
+);
 
 router
   .route("/")
