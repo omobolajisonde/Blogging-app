@@ -16,10 +16,11 @@ passport.use(
       try {
         // Check if the user associated with token still exists
         const claimUser = await User.findById(payload.user._id);
-        if (!claimUser)
+        if (!claimUser) {
           return done(
             new AppError("User associated with token no longer exists.", 401)
           );
+        }
         // Check if the password has been changed after token was issued
         const passwordModified = claimUser.passwordModified(payload.iat);
         if (passwordModified)

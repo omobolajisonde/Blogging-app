@@ -1,5 +1,5 @@
 const express = require("express");
-const passport = require("passport");
+const passportRequestHandler = require("../middlewares/passportHandler");
 
 const {
   getAllBlogs,
@@ -14,33 +14,21 @@ const { blogValidation } = require("../middlewares/validationMiddleware");
 
 const router = express.Router();
 
-router.get(
-  "/confirmAccess",
-  passport.authenticate("jwt", { session: false }),
-  confirmAccess
-);
+router.get("/confirmAccess", passportRequestHandler, confirmAccess);
 
 router
   .route("/")
   .get(getAllBlogs)
-  .post(
-    passport.authenticate("jwt", { session: false }),
-    blogValidation,
-    createBlog
-  );
+  .post(passportRequestHandler, blogValidation, createBlog);
 
-router
-  .route("/my")
-  .get(passport.authenticate("jwt", { session: false }), getAllMyBlogs);
+router.route("/my").get(passportRequestHandler, getAllMyBlogs);
 
-router
-  .route("/my/:id")
-  .get(passport.authenticate("jwt", { session: false }), getBlog);
+router.route("/my/:id").get(passportRequestHandler, getBlog);
 
 router
   .route("/:id")
   .get(getBlog)
-  .patch(passport.authenticate("jwt", { session: false }), patchBlog)
-  .delete(passport.authenticate("jwt", { session: false }), deleteBlog);
+  .patch(passportRequestHandler, patchBlog)
+  .delete(passportRequestHandler, deleteBlog);
 
 module.exports = router;

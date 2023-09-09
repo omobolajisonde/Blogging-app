@@ -1,5 +1,5 @@
 const express = require("express");
-const passport = require("passport");
+const passportRequestHandler = require("../middlewares/passportHandler");
 
 const {
   getAllUsers,
@@ -13,15 +13,11 @@ const router = express.Router();
 
 router.route("/").get(getAllUsers);
 router.route("/:id").get(getUser);
-router
-  .route("/updateMe")
-  .patch(passport.authenticate("jwt", { session: false }), updateMe);
+router.route("/updateMe").patch(passportRequestHandler, updateMe);
 router
   .route("/updateMyPassword")
-  .patch(passport.authenticate("jwt", { session: false }), updateMyPassword);
+  .patch(passportRequestHandler, updateMyPassword);
 
-router
-  .route("/deleteMe")
-  .delete(passport.authenticate("jwt", { session: false }), deleteMe);
+router.route("/deleteMe").delete(passportRequestHandler, deleteMe);
 
 module.exports = router;
