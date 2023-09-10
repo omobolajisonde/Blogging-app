@@ -11,11 +11,10 @@ const emailSender = async function (options) {
     },
   });
   let mailOptions = {
-    from: `"Sonde Omobolaji 🎯" <${process.env.EMAIL_USER}>`, // sender address
+    from: `"LorenzoTv" <${process.env.EMAIL_USER}>`, // sender address
     to: options.email, // list of receivers
     subject: options.subject, // Subject line
-    text: options.body, // plain text body
-    html: `<div>${options.body}</div>`, // html body
+    html: options.body, // html body
   };
 
   const info = await transporter.sendMail(mailOptions);

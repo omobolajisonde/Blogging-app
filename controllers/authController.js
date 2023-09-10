@@ -57,11 +57,36 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   if (!user) return next(new AppError("User does not exist!", 404));
   const resetToken = user.genResetToken();
   user.save({ validateBeforeSave: false }); // persists the changes made in  genResetToken function
-  const resetPasswordURL = `${req.protocol}://${req.get(
-    "host"
-  )}/api/v1/auth/resetPassword/${resetToken}`;
-  const body = `Forgot your password? Submit a PATCH request with your new password and confirmPassword to: <a href=${resetPasswordURL}>${resetPasswordURL}</a>.\nIf you didn't forget your password, please ignore this email!`;
-  const subject = "Your password reset token (valid for 10 min)";
+  const resetPasswordURL = `${process.env.CLIENT_BASE_URL}/resetPassword?token=${resetToken}`;
+  const body = `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>LorenzoTv Password Reset</title>
+  </head>
+  <body>
+      <div style="max-width: 600px; margin: 0 auto;">
+          <header style="background-color: #3498db; padding: 20px; text-align: center; color: #fff;">
+              <h1>LorenzoTv Password Reset</h1>
+          </header>
+          <div style="padding: 20px;">
+              <p>Hello, ${user.firstName}</p>
+              <p>We received a request to reset your password. To reset your password, please click the button below:</p>
+              <p style="text-align: center;">
+                  <a href=${resetPasswordURL} style="background-color: #3498db; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
+              </p>
+              <p>If you didn't request this password reset, you can ignore this email.</p>
+              <p>Thank you!</p>
+          </div>
+          <footer style="background-color: #f2f2f2; padding: 20px; text-align: center;">
+              <p>&copy; 2023 LorenzoTv</p>
+          </footer>
+      </div>
+  </body>
+  </html>
+  `;
+  const subject = "LorenzoTv Password Reset (valid for 10 min)";
   try {
     await emailSender({ email, body, subject });
     return res.status(200).json({
