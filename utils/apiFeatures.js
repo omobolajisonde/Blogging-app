@@ -25,7 +25,7 @@ class ApiFeatures {
     }
     if (this.queryParams.tags) {
       const tags = this.queryParams.tags.split(",").map((tag) => tag.trim());
-      this.query = this.query.find({ tags: { $all: tags } }); // returns documents whose tags array contains all the tags specifed in any order
+      this.query = this.query.find({ tags: { $all: tags } }); // returns documents whose tags array contains the tags specifed in any order without regard to order or other elements in the array,
     }
     if (this.queryParams.title) {
       this.query = this.query.find({

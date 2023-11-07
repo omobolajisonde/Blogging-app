@@ -41,6 +41,10 @@ const userSchema = new Schema({
       message: "Passwords must match.",
     },
   },
+  emailIsVerified: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now(),
@@ -48,7 +52,14 @@ const userSchema = new Schema({
   passwordModifiedAt: { type: Date },
   passwordResetToken: { type: String },
   passwordResetTokenExpiryTime: Date,
+  emailVerificationToken: String,
+  emailVerificationTokenExpiresIn: Date,
 });
+
+// Query /find/ middleware/hook
+// userSchema.pre(/^find/, async function () {
+//   this.find({ emailIsVerified: { $ne: false } });
+// });
 
 // Pre document hook for hashing password before save
 userSchema.pre("save", async function (next) {
@@ -88,8 +99,17 @@ userSchema.methods.genResetToken = function () {
   const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
   this.passwordResetToken = hashedToken;
   this.passwordResetTokenExpiryTime = Date.now() + 10 * 60 * 1000;
-  console.log(token, hashedToken);
   return token;
+};
+
+userSchema.methods.genEmailVerificationToken = function () {
+  const emailVerificationToken = crypto.randomBytes(32).toString("hex");
+  this.emailVerificationToken = crypto
+    .createHash("sha256")
+    .update(emailVerificationToken)
+    .digest("hex");
+  this.emailVerificationTokenExpiresIn = Date.now() + 60 * 60 * 1000; // An hour
+  return emailVerificationToken;
 };
 
 const User = mongoose.model("User", userSchema);

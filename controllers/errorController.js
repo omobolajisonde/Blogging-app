@@ -47,7 +47,6 @@ const sendErrorProd = (err, res) => {
       message: err.message,
     });
   } else {
-    console.error(err);
     return res.status(500).json({
       status: "Internal server error",
       message: "Something went terribly wrong!",

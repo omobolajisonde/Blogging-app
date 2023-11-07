@@ -12,6 +12,8 @@ const globalErrorMiddleware = require("./controllers/errorController");
 const authRouter = require("./routes/authRoutes");
 const userRouter = require("./routes/userRoutes");
 const blogRouter = require("./routes/blogRoutes");
+const commentRouter = require("./routes/commentRoutes");
+
 const httpLogger = require("./logger/httpLogger");
 
 const app = express();
@@ -55,6 +57,7 @@ app.get("/api/v1", rootController);
 app.use(`${API_BASE_URL}/auth`, authRouter);
 app.use(`${API_BASE_URL}/users`, userRouter);
 app.use(`${API_BASE_URL}/blogs`, blogRouter);
+app.use(`${API_BASE_URL}/comments`, commentRouter);
 
 // Any request that makes it to this part has lost it's way
 app.all("*", (req, res, next) => {

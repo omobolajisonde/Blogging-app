@@ -6,6 +6,37 @@ const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const emailSender = require("../utils/emaliSender");
 const genToken = require("../utils/genToken");
+const { generateEmailVerificationHTML } = require("../utils/emailTemplate");
+
+const sendVerificationEmail = async function (user, req, res, next) {
+  const emailVerificationToken = user.genEmailVerificationToken();
+  await user.save({ validateBeforeSave: false });
+  const emailVerificationURL = `${process.env.CLIENT_BASE_URL}/signup/verifyEmail/${emailVerificationToken}`;
+  const body = generateEmailVerificationHTML(
+    user.firstName,
+    emailVerificationURL
+  );
+  const subject = `${user.firstName}, verify your email address.`;
+  try {
+    await emailSender({
+      email: user.email,
+      subject,
+      body,
+    });
+    return res.status(201).json({
+      status: "success",
+      message: `Almost done, ${user.firstName}. A verification email has been sent to the email address provided.`,
+    });
+  } catch (error) {
+    user.emailVerificationToken = undefined;
+    user.emailVerificationTokenExpiresIn = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(
+      new AppError("There was an error sending the email. Try again later!"),
+      500
+    );
+  }
+};
 
 exports.signUpUser = catchAsync(async (req, res, next) => {
   const { firstName, lastName, email, password, confirmPassword } = req.body;
@@ -16,15 +47,46 @@ exports.signUpUser = catchAsync(async (req, res, next) => {
     password,
     confirmPassword,
   });
-  user.password = undefined; // so the password won't show in the output and as payload in the token
-  user.__v = undefined;
-  const token = genToken(user);
-  return res.status(201).json({
+  // user.password = undefined; // so the password won't show in the output and as payload in the token
+  // user.__v = undefined;
+  // const token = genToken(user);
+  // return res.status(201).json({
+  //   status: "success",
+  //   token,
+  //   data: {
+  //     user,
+  //   },
+  // });
+  return await sendVerificationEmail(user, req, res, next);
+});
+
+exports.verifyEmail = catchAsync(async (req, res, next) => {
+  // 1) Get user based on the token
+  const { emailVerificationToken } = req.body;
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(emailVerificationToken)
+    .digest("hex");
+  const unverifiedUser = await User.findOne({
+    emailVerificationToken: hashedToken,
+    emailVerificationTokenExpiresIn: { $gt: Date.now() }, // this confirms that the token hasn't expired
+  });
+  // 2) If token has expired
+  if (!unverifiedUser) {
+    return next(
+      new AppError(
+        "Email verification link is invalid or has expired. Try sign up again to get a fresh link.",
+        400
+      )
+    );
+  }
+  // 3) Activate the account
+  unverifiedUser.emailIsVerified = true;
+  await unverifiedUser.save({ validateModifiedOnly: true });
+
+  return res.status(200).json({
     status: "success",
-    token,
-    data: {
-      user,
-    },
+    message: `Email verification successful. Please proceed to signin.`,
   });
 });
 
@@ -98,7 +160,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     user.passwordResetToken = undefined;
     user.passwordResetTokenExpiryTime = undefined;
     await user.save({ validateBeforeSave: false });
-    console.log(error);
     return next(
       new AppError(
         "Something went wrong while sending a password resent link to your email. Please try again later.",

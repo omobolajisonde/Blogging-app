@@ -1,7 +1,6 @@
 const dotenv = require("dotenv");
 dotenv.config(); // loads enviroment variables into process.env
 const logger = require("./logger/logger");
-
 // Handling *uncaught exceptions*
 // process.on("uncaughtException", (err) => {
 //   console.log(err.name, err.message);
